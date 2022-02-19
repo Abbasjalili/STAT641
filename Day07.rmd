@@ -1,0 +1,108 @@
+---
+title: "Day07"
+author: "Abbas Jalili"
+date: "2/9/2022"
+output: html_document
+---
+
+```{r}
+library(bootstrap)
+library(boot)
+```
+
+
+
+```{r}
+n <- length(mouse.t)
+m <- length(mouse.c)
+```
+
+
+```{r}
+id <- as.factor(c(rep("1", n ), rep("2", m)))
+
+total <- cbind(id, c(mouse.t, mouse.c))
+
+meanDif <- function(d,i){
+  y <- tapply(total[i,2], total[i,1], mean)
+  y[1]-y[2]
+}
+
+boot(total, statistic = meanDif, strata = id, R=10000)
+
+boot.ci(boot(total, statistic = meanDif, strata = id, R=10000), conf = 0.95, type = "perc")
+```
+
+
+```{r}
+x.b <- c(7.0, 10.0, 10.6, 10.2, 8.6, 7.6, 8.2, 10.4, 11.0, 8.5)
+x.e <- c(3.4, 7.8, 9.4, 4.7, 5.4, 7.6, 5.0, 8.0, 7.8, 9.6)
+```
+
+
+```{r}
+z <- length(x.b)
+w <- length(x.e)
+```
+
+
+```{r}
+id2 <- as.factor(c(rep("1", z), rep("2", w)))
+```
+
+```{r}
+new <- cbind(id2, c(x.b, x.e))
+new
+```
+
+```{r}
+mean_dif <- function(d, i){
+  y <- tapply(d[i, 2], d[i, 1], mean)
+  y[1]-y[2]
+}
+
+boot.out <- boot(new, statistic = mean_dif, R=10000, strata = id2)
+boot.out
+```
+
+```{r}
+boot.ci(boot.out, conf = 0.95, type = "perc")
+```
+
+Yes, it is significant. 
+
+
+
+
+```{r}
+set.seed(123)
+
+mean_df <-c()
+
+for (i in 1:10000){
+  mean_xb <- mean(sample(x.b, length(x.b), replace = TRUE))
+  mean_xe <- mean(sample(x.e, length(x.e), replace = TRUE))
+  
+  mean_df[i] <- mean_xb - mean_xe
+}
+
+quantile(mean_df, c(0.025, 0.975))
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

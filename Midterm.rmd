@@ -1,0 +1,129 @@
+---
+title: "Untitled"
+author: "Abbas Jalili"
+date: "2/7/2022"
+output: html_document
+---
+
+```{r}
+library(infer)
+library(moderndive)
+library(car)
+library(mdsr)
+library(openintro)
+library(NHANES)
+library(MASS)
+
+
+df <- promotions
+str(df)
+```
+
+```{r}
+cdc <- readRDS(url("https://ericwfox.github.io/data/cdc.rds"))
+cdc
+str(cdc)
+```
+
+```{r}
+cdc$genhlth<- as.factor(cdc$genhlth)
+cdc$gender <- as.factor(cdc$gender)
+cdc$smoke100 <- as.factor(cdc$smoke100)
+```
+
+```{r}
+str(cdc)
+```
+
+
+```{r}
+S_hat <- cdc%>%
+  specify(smoke ~ gender) %>%
+  calculate(stat = 'diff in props')
+```
+
+
+```{r}
+null <- cdc %>%
+  specify(age ~ genhlth) %>%
+  hypothesize(null = "independence")  %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = 'F')
+```
+
+
+```{r}
+null %>%
+  visualize(bins = 5) +
+  shade_p_value(obs_stat = S_hat, direction = "greater")
+```
+
+```{r}
+null %>%
+  get_p_value(obs_stat = S_hat, direction = "greater")
+```
+
+
+
+```{r}
+# load in the dataset
+data(gss)
+
+# take a glimpse at it
+str(gss)
+```
+
+```{r}
+F_hat <- gss %>% 
+  specify(age ~ partyid) %>%
+  calculate(stat = "F")
+```
+
+```{r}
+null_dist <- gss %>%
+   specify(age ~ partyid) %>%
+   hypothesize(null = "independence") %>%
+   generate(reps = 1000, type = "permute") %>%
+   calculate(stat = "F")
+```
+
+```{r}
+visualize(null_dist) +
+  shade_p_value(obs_stat = F_hat, direction = "greater")
+```
+
+```{r}
+null_dist %>%
+  get_p_value(obs_stat = F_hat, direction = "greater")
+```
+
+
+```{r}
+null_dist <- cdc1 %>%
+  specify(weight ~ gender)%>%
+  hypothesize(null = "independence") %>%
+cdc <- readRDS(url("https://ericwfox.github.io/data/cdc.rds"));head(cdc)
+cdc$smoke100 <- as.factor(cdc$smoke100)
+cdc$genhlth <- as.factor(cdc$genhlth)
+cdc$smoke<- ifelse(cdc$smoke100 == 1, "Smoke over 100 cig", "less than 100 cig")
+
+cdc1 <- cdc %>% sample_n(size = length(cdc$smoke100))
+cdc1$exerany <- as.factor(cdc1$exerany)
+cdc1
+
+```
+
+
+```{r}
+null_dist <- cdc1 %>%
+  specify(weight ~ gender)%>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in means", order = c("f", "m"))
+null_dist
+
+```
+
+
+
+

@@ -1,0 +1,394 @@
+---
+title: "STAT641.HMW01"
+author: "Abbas Jalili"
+date: "2/14/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+#loading the libararies
+pacman::p_load(bootstrap, tidyverse, boot, gtools, knitr)
+```
+
+
+
+
+# Q.1
+
+Aflatoxin residues in peanut butter: In actual testing, 12 lots of peanut butter had aflatoxin residues in parts 
+per billion of 4.94, 5.06, 4.53, 5.07, 4.99, 5.16, 4.38, 4.43, 4.93, 4.72, 4.92,and 4.96.
+
+```{r}
+#loading the data:
+aflatoxin <- c(4.94, 5.06, 4.53, 5.07, 4.99, 5.16, 4.38, 4.43, 4.93, 4.72, 4.92, 4.96)
+n <- length(aflatoxin)
+```
+
+## 1.a):
+
+How many possible bootstrap resamples of these data are there?
+
+
+To calculate the total possible amount of bootstrap reasample of size n, we can use the combination():
+
+```{r}
+samples <- combinations(12, 12, aflatoxin, repeats.allowed = TRUE)
+dim(samples)
+```
+
+There are 1,352,078 possible bootstrap resample of these data with size of n = 12.
+
+\newpage
+## 1.b):
+
+Using R and the sample() function, or a random number generator, generate five
+resamples of the integers from 1 to 12.
+
+
+```{r}
+set.seed(1234)
+boot_samp <- lapply(1:5, function(x) sample(1:12, 12, replace = TRUE))
+boot_samp
+```
+
+* I generate the five resamples of the integers from 1 to 12 with sample() as you can see above.
+
+## 1.c):
+
+For each of the resamples in b, find the mean of the corresponding elements of the
+aflatoxin data set. Print out the 5 bootstrap means.
+
+```{r}
+resamp_mean <- sapply(boot_samp, function(x) mean(aflatoxin[x]))
+resamp_mean
+```
+
+* Now I got the mean for each resamples to the corresponding value from the original dataset.
+
+\newpage
+## 1.d):
+
+Find the mean of the resample means. Compare this with the mean of the original
+data set.
+
+```{r}
+mean(resamp_mean)
+mean(aflatoxin)
+```
+
+* Next comparing the mean value of the five resamples and the original data set. As we can see, both mean values are pretty close to each others.
+
+## 1.e):
+
+Find the minimum and the maximum of the five resample means. This is a crude
+bootstrap confidence interval on the mean. (If you had used 1000 resamples, and
+used the 25th and 975th largest means, this would have given a reasonable 95%
+confidence interval.)
+
+
+```{r}
+summary(resamp_mean)
+```
+
+* The 1st and 3rd quantile of the five resample means are 4.807 and 4.881. Also the min and max of the  five resample means are 4.799 and 4.962.
+
+\newpage
+# Q.2:
+
+Airline accidents: According to the U.S. National Transportation Safety Board, the
+number of airline accidents by year from 1983 to 2006 were:
+
+```{r}
+#loading the data:
+
+airline <- c(23, 16, 21, 24, 34, 30, 28, 24, 26, 18, 23, 23, 36,
+37, 49, 50, 51, 56, 46, 41, 54, 30, 40, 31)
+```
+
+
+## 2.a):
+
+For the sample data, compute the mean and its standard error (use sd()), and the
+median.
+
+
+```{r}
+print(paste("The mean of the sample data is:", round(mean(airline), 2)))
+print(paste("The median of the sample data is:",round(median(airline), 2)))
+print(paste("The standard error of the sample data is:",round(sd(airline), 2)))
+```
+\newpage
+## 2.b):
+
+Using R , compute bootstrap estimates of the mean and median with estimates of
+their standard errors, using B = 1000. (Use set.seed(1234) to allow your results
+to be reproduced.) Also, compute the median of the bootstrap estimates of median.
+
+```{r}
+set.seed(1234)
+
+B <- 1000
+
+boot_mean <- c()
+boot_median <- c()
+
+
+for (i in 1:B) {
+
+a = sample(airline, 24, replace = TRUE)
+
+boot_mean[i] = mean(a)
+boot_median[i] = median(a)
+
+}
+
+
+print(paste("The bootstrap estimate of the mean is:", 
+            round(mean(boot_mean), 2)))
+print(paste("The bootstrap estimate of the median is:", 
+            round(mean(boot_median), 2)))
+
+
+print(paste("The bootstrap estimates of standard errors of the mean is:", 
+            round(sd(boot_mean), 2)))
+print(paste("The bootstrap estimates of standard errors of the median is:", 
+            round(sd(boot_median), 2)))
+
+
+print(paste("The median of the bootstrap estimates of median is:", 
+            round(median(boot_median), 2)))
+
+
+```
+
+
+
+## 2.c):
+
+Compare parts (a) and (b). How do the estimates compare?
+
+Mean of the sample data and bootstrap estimate of the mean are very close (33.79167 and 33.81183). The mean of the bootstrap median is 31.5065
+, but the median of the bootstrap estimates of median is 30.5 which is equal to the sample data median. The sample data has a bigger standard error value equal to 
+12.06497. The bootstrap estimates of standard errors of the mean is 2.463745 and the bootstrap estimates of standard errors of the median is 3.75637.
+
+\newpage
+# Q.3:
+
+Input the mouse example data in R. Complete this question using the sample() function
+in R . 
+
+```{r}
+treat <- mouse.t
+ctrl <-  mouse.c
+
+t1 <- length(treat)
+t2 <- length(ctrl)
+
+Group <- as.factor( c(rep(1, t1), rep(2, t2)))
+
+Group <- as.factor(ifelse(Group == 1, "Treatment", "Control"))
+
+
+mouse <- data.frame(Group, Survival_time = c(treat, ctrl))
+
+# Create an another variable called mouse1 which shuffles the original dataset.
+mouse1 <- mouse %>% sample_n(size = 16)
+kable(head(mouse1))
+
+# Exploratory data analysis
+kable(mouse1 %>%
+  group_by(Group) %>%
+  summarise(
+    count = n(),
+    Mean = round(mean(Survival_time),2)
+  ))
+```
+
+*The first table shows the head() of the dataset, and the second one shows the count and mean values for each groups.
+
+\newpage
+## 3.a):
+
+For the treatment group alone, find the bootstrap estimates for the mean and its
+standard error with B = 50, 100, 200, 500, 1000 and 10,000.
+
+```{r}
+set.seed(1234)
+
+result <- c()
+
+boott_mean <- c()
+boott_sd <- c()
+
+
+B <- c(50, 100, 200, 500, 1000, 10000)
+
+for(j in 1:length(B)) {
+  for(i in 1:B[j]) {
+   
+    result[i] = mean(sample(mouse.t, length(mouse.t), replace = TRUE))
+  }
+  boott_mean[j] <- mean(result)
+  boott_sd[j] <- sd(result)
+}
+
+kable(round(boott_mean, 2), col.names = c("Boot_t_Mean"))
+kable(round(boott_sd, 2), col.names = c("Boot_t_Sd"))
+```
+
+* Tables above are representing the bootstrap estimates for the mean and its standard errors.
+
+\newpage
+## 3.b):
+
+
+```{r}
+set.seed(1234)
+
+result <- c()
+
+
+boott_median <- c()
+boottm_sd <- c()
+
+
+B <- c(50, 100, 200, 500, 1000, 10000)
+
+for(j in 1:length(B)) {
+  for(i in 1:B[j]) {
+   
+    result[i]= median(sample(mouse.t, length(mouse.t), replace = TRUE))
+  }
+  
+  boott_median[j] <- mean(result)
+  boottm_sd[j] <- sd(result)
+}
+
+
+kable(round(boott_median, 2), col.names = c("Boot_t_Median"))
+kable(round(boottm_sd, 2), col.names = c("Boot_t_Sdm"))
+```
+
+* Tables above are representing the bootstrap estimates for the median and its standard errors.
+
+\newpage
+## 3.c):
+
+Create a table to represent the simulation results from parts (a) and (b).
+
+
+```{r}
+#creating the table of the results:
+
+bootstrap <- data.frame(B, Bootstrap_Mean = round(boott_mean, 2) , 
+                        SD_mean = round(boott_sd, 2) ,
+                        Bootstrap_Median = round(boott_median, 2), 
+                        SD_median = round(boottm_sd, 2))
+
+kable(bootstrap)
+```
+
+* Table above is the combination of the two previous tables.
+
+\newpage
+## 3.d):
+
+Now using bootstrap methods find an estimate for the median and its standard
+error for the control group.
+
+```{r}
+set.seed(1234)
+
+result <- c()
+
+
+bootc_median <- c()
+bootcm_sd <- c()
+
+
+B <- c(50, 100, 200, 500, 1000, 10000)
+
+for(j in 1:length(B)) {
+  for(i in 1:B[j]) {
+   
+    result[i]= median(sample(mouse.c, length(mouse.c), replace = TRUE))
+  }
+  
+  bootc_median[j] <- mean(result)
+  bootcm_sd[j] <- sd(result)
+}
+
+
+kable(round(bootc_median, 2), col.names = c("Boot_c_Median"))
+kable(round(bootcm_sd, 2), col.names = c("Boot_c_Sd"))
+```
+
+* Table for control group bootstrap estimate the median and its standard error.
+
+\newpage
+## 3.e):
+
+Use results from parts (b) and (d) to find the estimated standard error for the
+difference between the medians.
+
+```{r}
+bootd_median <- boott_median - bootc_median
+
+sd(bootd_median)
+```
+
+* The standard error for difference between the medians is 2.005.
+
+
+\newpage
+# Q.4:
+
+Let $X_1, X_2, . . . , X_n \sim   Gamma \ (2, \theta)$, where $\theta$ is unknown number. How do we estimate
+the standard error of the MLE estimator of $\theta$ ? Use boot package and generate your
+original sample with:
+
+```{r}
+set.seed(123)
+
+x <- rgamma(200, shape = 2, scale = 5) #original data
+
+mle_gamma <- function(x)mean(x)/2
+
+gboot <- function(x, mle)rgamma(length(x), shape = 2, scale = mle)
+
+b_gamma <- boot(x, mle_gamma, R=1000, sim = "parametric", ran.gen =gboot, mle = mean(x)/2)
+
+b_gamma
+```
+
+* I used the boot function and Parametric bootstrap method to calculate the standard error of the MLE estimator of $\theta$.
+As we know the MLE estimator for gamma distribution is :
+
+$$X_1, X_2, . . . , X_n \sim   Gamma \ (k, \theta)$$
+
+$$\hat \theta = \frac {\sum_{i=1}^N x_i}{kN}$$ where k = shape in rgamma() function. 
+
+* The standard error of the MLE is equal to 0.213.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,74 @@
+---
+title: "Day04"
+author: "Abbas Jalili"
+date: "1/31/2022"
+output: html_document
+---
+
+```{r}
+aflatoxin <- c(4.94, 5.06, 4.53, 5.07, 4.99, 5.16, 4.38, 4.43, 4.93, 4.72, 4.92, 4.96)
+```
+
+```{r}
+set.seed(888)
+
+
+
+bsamp <- lapply(1:5, function(x) sample(1:12, 12, replace = TRUE))
+
+sapply(bsamp, function(x) mean(aflatoxin[x]))
+
+mean(aflatoxin)
+```
+
+```{r}
+quantile(sapply(bsamp, function(x) mean(aflatoxin[x])), probs = c(0.025,0.975))
+```
+
+```{r}
+library(bootstrap)
+trt <- mouse.t
+```
+
+```{r}
+ctl <- mouse.c
+```
+
+```{r}
+result <- bootstrap(mouse.t, 1000, theta = mean)
+sd(result$thetastar)
+```
+
+```{r}
+set.seed(123)
+
+
+
+result <- c()
+
+boot_mean <- c()
+boot_median <- c()
+boot_sd <- c()
+
+B <- c(50, 100, 200, 500, 1000, 10000)
+
+for(j in 1:length(B)) {
+  for(i in 1:B[j]) {
+   
+    result[i]= mean(sample(mouse.t, length(mouse.t), replace = TRUE))
+  }
+  boot_mean[j] <- mean(result)
+  boot_median[j] <- median(result)
+  boot_sd[j] <- sd(result)
+}
+
+boot_mean
+boot_median
+boot_sd
+
+```
+
+
+
+
+

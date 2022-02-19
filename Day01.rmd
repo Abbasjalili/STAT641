@@ -5,26 +5,86 @@ date: "1/19/2022"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+library(bootstrap)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+```{r}
+x <- rnorm(20)
+
+theta <- function(x){mean(x)}
+
+result <- bootstrap(x, 100, theta)
+
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+xdata <- matrix(rnorm(30), ncol=2)
+
+n <- 15
+
+theta <- function(x, xdata){cor(xdata[x, 1], xdata[x, 2])}
+
+results <- bootstrap(1:n, 20, theta, xdata)
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r}
+n <- c(11037, 11034)
+s <- c(119,98)
+```
+
+```{r}
+pop1 <- c(rep(1, s[1]), rep(0, n[1]-s[1]))
+pop2 <- c(rep(1, s[2]), rep(0, n[2]-s[2]))
+```
+
+
+
+```{r}
+bootstrap_sample1 <- sample(pop1, 11037, replace = TRUE)
+bootstrap_sample2 <- sample(pop2, 11034, replace = TRUE)
+```
+
+
+```{r}
+pro1 <- sum(bootstrap_sample1 == 1)
+pro2 <- sum(bootstrap_sample2 == 1)
+
+theta_hat = (pro1/n[1])/(pro2/n[2])
+theta_hat
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

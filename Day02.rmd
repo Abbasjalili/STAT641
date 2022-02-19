@@ -1,0 +1,135 @@
+---
+title: "Day02"
+author: "Abbas Jalili"
+date: "1/24/2022"
+output: html_document
+---
+
+```{r}
+n <- c(11037, 11034)
+s <- c(119,98)
+```
+
+```{r}
+pop1 <- c(rep(1, s[1]), rep(0, n[1]-s[1]))
+pop2 <- c(rep(1, s[2]), rep(0, n[2]-s[2]))
+```
+
+
+
+
+```{r}
+R <- 1000
+
+theta_hat <- c()
+
+for (i in 1:R) {
+
+bootstrap_sample1 <- sample(pop1, 11037, replace = TRUE)
+bootstrap_sample2 <- sample(pop2, 11034, replace = TRUE) 
+
+
+pro1 <- sum(bootstrap_sample1 == 1)
+pro2 <- sum(bootstrap_sample2 == 1)
+
+theta_hat[i]= (pro1/n[1])/(pro2/n[2])
+
+}
+
+
+hist(theta_hat)
+```
+
+
+```{r}
+mean(theta_hat)
+
+quantile(theta_hat, probs = c(0.025,0.975))
+```
+
+
+
+```{r}
+airline <- c(23, 16, 21, 24, 34, 30, 28, 24, 26, 18, 23, 23,
+              36, 37, 49, 50, 51, 56, 46, 41, 54, 30, 40, 31)
+```
+
+```{r}
+mean(airline)
+median(airline)
+sd(airline)
+```
+
+
+
+
+```{r}
+set.seed(1234)
+
+a <- sample(airline, 24, replace = TRUE)
+
+a
+mean(a)
+median(a)
+sd(a)
+```
+
+
+```{r}
+R <- 1000
+
+result1 <- c()
+result2 <- c()
+
+
+for (i in 1:R) {
+
+a = sample(airline, 24, replace = TRUE)
+
+result1[i] = mean(a)
+result2[i] = median(a)
+}
+
+
+mean(result1)
+mean(result2)
+sd(result1)
+sd(result2)
+```
+
+```{r}
+mouse <- c(82, 107, 93)
+
+mean(mouse)
+
+b <- sample(mouse, 3, replace = TRUE)
+b
+```
+
+```{r}
+#27 combinations if with replacement: 
+theta = c()
+for(i in 1:10000){
+  s_a <- sample(mouse,3, replace = TRUE)
+  theta[i]<- mean(s_a)
+}
+mean(theta)
+summary(theta)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,78 @@
+---
+title: "Day05"
+author: "Abbas Jalili"
+date: "2/2/2022"
+output: html_document
+---
+
+```{r}
+library(boot)
+x <- rexp(50) # original data
+bootpercentile <- function(x, p) quantile(x, p)
+exp_boot <- function(x, mle) rexp(length(x), mle)
+(b <- boot(x, bootpercentile, R = 1000, sim = "parametric", ran.gen = exp_boot,
+mle = 1/mean(x), p = 0.95))
+
+```
+
+```{r}
+mean(b$t) # bootstrap estimate
+```
+
+```{r}
+mean(b$t) - b$t0 # bias
+```
+
+```{r}
+library(boot)
+x <- rexp(50)
+boot_percentile <- function(x, i, p) quantile(x[i], p)
+# allows boot to select sample
+boot(x, boot_percentile, R = 999, p = 0.95)
+
+```
+
+```{r}
+library(bootstrap)
+b <- bootstrap(x, 999, theta = boot_percentile, p = 0.95)
+sd(b$thetastar)
+
+```
+
+# Q.1:
+
+```{r}
+x <- rnorm(200)
+
+mean_f <- function(x, i) mean(x[i])
+
+boot(x, mean_f, R =1000)
+```
+
+```{r}
+sd_orig <- 1/sqrt(200)
+sd_orig
+```
+
+
+
+# Q.2:
+
+```{r}
+set.seed(2022)
+
+x <- rnorm(50)
+
+sample_var <- function(x) var(x)
+
+norm_boot <- function(x,mle)rnorm(length(x), 0, sqrt(mle))
+
+b_norm <- boot(x, sample_var, R=999, sim = "parametric", ran.gen =norm_boot, mle = var(x))
+
+b_norm
+```
+
+
+
+
+
