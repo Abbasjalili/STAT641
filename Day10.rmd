@@ -1,0 +1,22 @@
+---
+title: "Day09"
+author: "Abbas Jalili"
+date: "2/21/2022"
+output: html_document
+---
+
+```{r}
+library(resampledata)
+library(tidyverse)
+data("Bangladesh")
+head(Bangladesh)
+
+```
+
+```{r}
+df <- with(Bangladesh, Chlorine[!is.na(Chlorine)])
+```
+
+
+
+

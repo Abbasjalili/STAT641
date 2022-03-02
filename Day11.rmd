@@ -1,0 +1,115 @@
+---
+title: "Day11"
+author: "Abbas Jalili"
+date: "2/23/2022"
+output: html_document
+---
+
+```{r}
+library(boot)
+```
+
+
+```{r}
+model <- lm(Hwt ~ Bwt,data = catsM)
+View(catsM)
+```
+
+
+#a):
+
+```{r}
+par(mfrow = c(1,2))
+plot(model, index = 1)
+```
+
+# b):
+
+```{r}
+fit <- fitted(model)
+e <- residuals(model)
+X <- model.matrix(model)
+
+boot.fixed <- function(data, i){
+  
+  yb <- fit + e[i]
+  mod <- lm(yb ~ X - 1)
+  coefficients(mod)
+}
+
+catsm_fixed_boot <- boot(catsM, boot.fixed, 5000)
+catsm_fixed_boot
+```
+
+```{r}
+par(mfrow = c(1,2))
+plot(catsm_fixed_boot, index = 1)
+```
+
+
+
+```{r}
+par(mfrow = c(1,2))
+plot(catsm_fixed_boot, index = 2)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# d):
+
+```{r}
+boot.catsm <- function(data, i){
+  
+  data <- data[i,]
+  model <- lm(Hwt ~ Bwt,data = data)
+  coefficients(model)
+}
+
+model_boot <- boot(catsM, boot.catsm, 5000)
+model_boot
+```
+
+```{r}
+par(mfrow = c(1,2))
+plot(model_boot, index = 1)
+```
+
+```{r}
+par(mfrow = c(1,2))
+plot(model_boot, index = 2)
+```
+
+
+```{r}
+confint(model)
+```
+
+```{r}
+boot.ci(model_boot, index = 1, type = c('norm', 'perc', 'bca'))
+```
+
+```{r}
+boot.ci(model_boot, index = 2, type = c('norm', 'perc', 'bca'))
+```
+
+
+
+
+
+
+
+
+
+

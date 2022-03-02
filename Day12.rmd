@@ -1,0 +1,73 @@
+---
+title: "Day12"
+author: "Abbas Jalili"
+date: "2/28/2022"
+output: html_document
+---
+
+```{r}
+library(resampledata)
+library(tidyverse)
+str(Phillies2009)
+```
+
+```{r}
+Phillies <- Phillies2009 %>%
+  arrange(Location)
+Phillies
+```
+
+```{r}
+dim(Phillies)
+```
+
+
+
+
+```{r}
+Phillies2009 %>%
+  group_by(Location)%>%
+  summarize(strik_mean = round(mean(StrikeOuts), 2),
+            n =n())
+```
+
+
+```{r}
+obs_diff <- 7.31	 - 6.95
+
+diff_mean <- numeric()
+
+set.seed(123)
+
+for (i in 1:5000) {
+  pm <- sample(Phillies$StrikeOuts, 162, replace = FALSE)
+  diff_mean[i] <- mean(pm[1:81]) - mean(pm[82:162])
+  
+}
+
+hist(diff_mean)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

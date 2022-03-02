@@ -1,0 +1,196 @@
+---
+title: "STAT641_FINAL_REPORT"
+author: "Abbas Jalili"
+date: "2/28/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Section 1:
+
+```{r}
+pacman::p_load(boot, tidyverse, infer)
+```
+
+
+```{r}
+body_fat <- read.csv("C:/Users/AJALI/Downloads/Compressed/archive_2/bodyfat.csv")
+head(body_fat, 5)
+max(body_fat$Age)
+min(body_fat$Age)
+dim(body_fat)
+sum(is.na(body_fat))
+```
+
+\newpage
+
+```{r}
+set.seed(123)
+body_model <- lm(Age ~ Weight+Height+Density+Neck+Chest+Abdomen+Hip+Thigh+Knee+Ankle+
+                   Biceps+Forearm+Wrist+ BodyFat,data = body_fat)
+summary(body_model)
+```
+
+
+```{r}
+#making the null and full model fo anova:
+null_model <- lm(Age ~ 1, data = body_fat)
+full_model <- lm(Age ~ ., data = body_fat)
+# Comparing a full model with all the predictors to the null model or an initial model.
+anova(null_model, full_model)
+```
+
+
+```{r}
+# Use a stepwise selection method.
+step(full_model, scope = list(lower = null_model, upper = full_model), trace = 0)
+```
+
+
+
+
+
+```{r}
+#fitting the model after stepwise model selection:
+set.seed(123)
+new_model <- lm(Age ~ BodyFat + Weight + Height + Neck + Abdomen + Thigh + Knee + Ankle + 
+                  Forearm + Wrist, data = body_fat)
+summary(new_model)
+```
+
+```{r}
+confint(new_model)
+```
+
+
+
+
+
+```{r error=FALSE, warning=FALSE}
+par(mfrow = c(1,2))
+plot(new_model, index = 1)
+```
+
+\newpage
+
+```{r}
+set.seed(123)
+#residual bootstrap resampling(fixed X):
+fit_body <- fitted(new_model)
+e_body <- residuals(new_model)
+X_body <- model.matrix(new_model)
+
+boot.fixed_body <- function(data, i){
+  y_body <- fit_body + e_body[i]
+  mod_body <- lm(y_body ~ X_body - 1)
+  coefficients(mod_body)
+}
+body_fixed_boot <- boot(body_fat, boot.fixed_body, 5000)
+body_fixed_boot
+```
+
+```{r}
+par(mfrow = c(2,2))
+plot(body_fixed_boot, index = 1)
+plot(body_fixed_boot, index = 4)
+```
+
+
+\newpage
+
+```{r}
+set.seed(123)
+boot.body <- function(data, i){
+  data <- data[i,]
+  model_body <- lm(Age ~ BodyFat + Weight + Height + Neck + Abdomen + Thigh + 
+                     Knee + Ankle + Forearm + Wrist,data = data)
+  coefficients(model_body)
+}
+
+model_boot_body <- boot(body_fat, boot.body, 5000)
+model_boot_body
+```
+
+```{r}
+par(mfrow = c(2,2))
+plot(model_boot_body, index = 1)
+plot(model_boot_body, index = 4)
+```
+
+
+
+```{r}
+boot.ci(model_boot_body, index = 2, type = c('norm', 'perc', 'bca'))
+```
+
+
+```{r}
+boot.ci(body_fixed_boot, index = 2, type = c('norm', 'perc', 'bca'))
+```
+
+# Section 2:
+
+
+```{r}
+new_bodyfat <- body_fat %>% mutate(Group = ifelse(Age<=45, "22-45","46-81"))
+head(new_bodyfat, 5)
+```
+
+
+
+
+```{r}
+# Visualize barplot using a ggplot2 package
+new_bodyfat %>%
+  ggplot(aes(x = Group, fill = Group)) + geom_bar() + labs(title = "Age 22-45 Versus Age 46-81 Group", x = "Groups", y = "Count") +theme(panel.grid.major = element_blank())
+```
+
+
+
+
+```{r}
+new_df <- new_bodyfat %>% group_by(Group)%>%
+  summarise(n =n(),
+            Bodyfat_mean = mean(BodyFat))
+new_df
+```
+
+
+```{r}
+set.seed(123)
+# Calculate an observed test statistic.
+obs_test_stat <- new_bodyfat %>%
+  specify(BodyFat ~ Group)%>%
+  calculate(stat = "diff in means", order = c("46-81","22-45"))
+round(obs_test_stat,2)
+
+# To double check manually computed observed test statistics.
+obs_diff_mean = 20.55088 -	17.99420	 
+obs_diff_mean
+```
+
+
+```{r}
+set.seed(123)
+# Create the null distribution.
+null_dist <- new_bodyfat %>%
+  specify(BodyFat ~ Group)%>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 5000, type = "permute") %>%
+  calculate(stat = "diff in means", order = c("46-81","22-45"))
+head(null_dist,5)
+
+
+# Visualize the null distribution.
+null_dist %>%
+  visualize() +
+  shade_p_value(obs_stat = obs_test_stat, direction = "right", col = "blue", lty = 1, lwd = 1)
+```
+
+```{r}
+set.seed(123)
+# Compute the p-value.
+null_dist %>%
+  get_p_value(obs_stat = obs_test_stat, direction = "right")
+```
