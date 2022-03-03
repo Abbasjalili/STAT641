@@ -7,8 +7,11 @@ output:
   html_document: default
 ---
 
+<<<<<<< HEAD
 # Section 1:
 
+=======
+>>>>>>> 3f7b5c3a79a1ba4e23ff19d7c712e399b4d83c15
 ```{r}
 pacman::p_load(boot, tidyverse, infer)
 ```
@@ -59,6 +62,7 @@ new_model <- lm(Age ~ BodyFat + Weight + Height + Neck + Abdomen + Thigh + Knee 
 summary(new_model)
 ```
 
+<<<<<<< HEAD
 ```{r}
 confint(new_model)
 ```
@@ -66,13 +70,19 @@ confint(new_model)
 
 
 
+=======
+>>>>>>> 3f7b5c3a79a1ba4e23ff19d7c712e399b4d83c15
 
 ```{r error=FALSE, warning=FALSE}
 par(mfrow = c(1,2))
 plot(new_model, index = 1)
 ```
 
+<<<<<<< HEAD
 \newpage
+=======
+\neapage
+>>>>>>> 3f7b5c3a79a1ba4e23ff19d7c712e399b4d83c15
 
 ```{r}
 set.seed(123)
@@ -91,6 +101,7 @@ body_fixed_boot
 ```
 
 ```{r}
+<<<<<<< HEAD
 par(mfrow = c(2,2))
 plot(body_fixed_boot, index = 1)
 plot(body_fixed_boot, index = 4)
@@ -98,6 +109,28 @@ plot(body_fixed_boot, index = 4)
 
 
 \newpage
+=======
+par(mfrow = c(1,2))
+plot(body_fixed_boot, index = 1)
+```
+
+
+```{r}
+par(mfrow = c(1,2))
+plot(body_fixed_boot, index = 2)
+```
+
+```{r}
+par(mfrow = c(1,2))
+plot(body_fixed_boot, index = 3)
+```
+
+```{r}
+par(mfrow = c(1,2))
+plot(body_fixed_boot, index = 4)
+```
+
+>>>>>>> 3f7b5c3a79a1ba4e23ff19d7c712e399b4d83c15
 
 ```{r}
 set.seed(123)
@@ -113,23 +146,53 @@ model_boot_body
 ```
 
 ```{r}
+<<<<<<< HEAD
 par(mfrow = c(2,2))
 plot(model_boot_body, index = 1)
+=======
+par(mfrow = c(1,2))
+plot(model_boot_body, index = 1)
+```
+
+```{r}
+par(mfrow = c(1,2))
+plot(model_boot_body, index = 2)
+```
+
+
+```{r}
+par(mfrow = c(1,2))
+plot(model_boot_body, index = 3)
+```
+
+```{r}
+par(mfrow = c(1,2))
+>>>>>>> 3f7b5c3a79a1ba4e23ff19d7c712e399b4d83c15
 plot(model_boot_body, index = 4)
 ```
 
 
 
 ```{r}
+<<<<<<< HEAD
 boot.ci(model_boot_body, index = 2, type = c('norm', 'perc', 'bca'))
+=======
+boot.ci(model_boot_body, index = 1, type = c('norm', 'perc', 'bca'))
+>>>>>>> 3f7b5c3a79a1ba4e23ff19d7c712e399b4d83c15
 ```
 
 
 ```{r}
+<<<<<<< HEAD
 boot.ci(body_fixed_boot, index = 2, type = c('norm', 'perc', 'bca'))
 ```
 
 # Section 2:
+=======
+boot.ci(body_fixed_boot, index = 1, type = c('norm', 'perc', 'bca'))
+```
+
+>>>>>>> 3f7b5c3a79a1ba4e23ff19d7c712e399b4d83c15
 
 
 ```{r}
