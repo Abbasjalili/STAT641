@@ -1,0 +1,287 @@
+---
+title: "STAT641_HW02_Abbas_Jalili"
+author: "Abbas Jalili"
+date: "3/5/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+pacman::p_load(resampledata, tidyverse, boot)
+```
+
+
+# Q.1:
+
+The data set Bangladesh has measurements on water quality from 271 wells in Bangladesh.
+There are two missing values in the chlorine variable. Use the following R code to remove these
+two observations.
+
+```{r}
+data("Bangladesh")
+head(Bangladesh)
+df <- with(Bangladesh, Chlorine[!is.na(Chlorine)])
+```
+
+
+## 1.a):
+
+Find a 95% CI for the mean $\mu$ of chlorine levels in Bangladesh wells.
+
+```{r}
+#finding the Chlorine's mean: 
+
+m_chio <- mean(df)
+
+s <- sd(df)
+n <- length(df)
+
+se <- s/sqrt(n)
+```
+
+
+```{r}
+upper_b <- m_chio + 1.96 *se
+lower_b <- m_chio - 1.96 *se
+
+print(paste(round(lower_b , 2), round(upper_b, 2)))
+```
+
+We are 95% confident that the chlorine's mean is between 52.99 and 103.18.
+
+## 1.b):
+
+Find the 95% bootstrap percentile, bootstrap t, and Bca confidence intervals for the mean
+chlorine level, and compare results. Which confidence interval will you report?
+
+```{r}
+set.seed(123)
+
+theta_hat <- function(df, i){
+  r <- mean(df[i])
+  r.var <- var(df[i])
+  return(c(r, r.var))
+}
+
+boot_mean <- boot(data = df, statistic = theta_hat, R = 5000)
+
+boot.ci(boot_mean)
+```
+
+I prefer to report the BCa as the 95% CI. I tried to check all of the types for reporting the CI in one summary table.If we check the confidence interval in different types, we can see that Normal, Basic, and Percentile are very close
+to the original, but Studentized and BCa are quite different. This means the data set is not following the normality. In theory BCa is the best result to report 
+the confidence interval.
+
+
+# Q.2:
+
+Dataset catsM contains a set of data on the heart weights and body weights of 97 male cats.
+We investigate the dependence of heart weight (in g) on body weight (in kg). The data set
+is available in the boot package.
+
+## 2.a):
+
+Investigate the data set by first fitting a straight line regression and creating diagnostic
+plots.
+
+
+```{r}
+#checking the dataset and fit the regression line:
+
+head(catsM, 5)
+model <- lm(Hwt ~ Bwt, data = catsM)
+summary(model)
+```
+
+
+```{r}
+ggplot(data = catsM, aes(Bwt, Hwt))+
+  geom_point()+
+  geom_smooth(formula = y~x, method = 'lm', se = FALSE)
+```
+
+Based the regression line showed in the scatter plot above, it shows most of data point are scattered around the regression line except two outliers. We can investigate those point in 
+diagnostic plots in the next part:
+
+
+```{r}
+#plotting the regression model:
+
+par(mfrow = c(1,2))
+plot(model, 1:4)
+```
+
+
+By checking the assumptions, we don't see a pattern in residual-fitted plot, but the QQ-plot shows some outliers.
+It is possibility of skewed distribution too. With checking the cook's distance plot, we can see three data points are 
+far two the rest of the data points which can effect on the distribution.
+
+## 2.b):
+
+Next, perform model-based bootstrap regression (residual resampling). Are the bootstrap
+estimates for intercept and slopes appear normal? Is the model-based standard error for
+the original fit accurate?
+
+
+```{r}
+set.seed(111)
+
+fit <- fitted(model)
+e <- residuals(model)
+X <- model.matrix(model)
+
+boot.fixed <- function(data, i){
+  
+  yb <- fit + e[i]
+  mod <- lm(yb ~ X - 1)
+  coefficients(mod)
+}
+
+catsm_fixed_boot <- boot(catsM, boot.fixed, 5000)
+catsm_fixed_boot
+```
+
+
+```{r}
+par(mfrow = c(1,2))
+plot(catsm_fixed_boot, index = 1)
+```
+
+```{r}
+par(mfrow = c(1,2))
+plot(catsm_fixed_boot, index = 2)
+```
+
+After performing model-based bootstrap regression, we clearly see the improvement in normality. The bootstrap
+estimates for intercept and slopes are appear normal.Since the original standard error and residual resampling have the almost 
+same standard error, we can conclude that residual resampling is accurate, and we can get a normal distribution for the residual resampling.
+
+
+## 2.c):
+
+Do you think the results are effected by any single observation?
+
+No. because the standard error for the original fit and bootstrap method are pretty close, those single observations are not effected the result. We could improve the normality
+with using the residual resampling and it is accurate also.
+
+## 2.d):
+
+Perform the observation resampling method. And compare the results with (b) and (c).
+
+```{r}
+set.seed(111)
+
+boot.catsm <- function(data, i){
+  
+  data <- data[i,]
+  model <- lm(Hwt ~ Bwt,data = data)
+  coefficients(model)
+}
+
+model_boot <- boot(catsM, boot.catsm, 5000)
+model_boot
+```
+
+```{r}
+par(mfrow = c(1,2))
+plot(model_boot, index = 1)
+```
+
+```{r}
+par(mfrow = c(1,2))
+plot(model_boot, index = 2)
+```
+
+After checking the standard error for all the summary tables, we can see the residual resampling have the lowest standard error values. However, the original regression model
+has almost same values in standard error, but the normality assumption is satisfied in residual resampling. 
+
+
+# Q.3:
+
+The file Phillies2009 contains data from the 2009 season for the baseball team the Philadelphia
+Phillies.
+
+```{r}
+str(Phillies2009)
+```
+
+
+## 3.a):
+
+Find the mean number of strike outs per game (StrikeOuts) for the home and the away
+games (Location).
+
+```{r}
+Phillies <- Phillies2009 %>%
+  arrange(Location)
+head(Phillies, 5)
+```
+
+
+```{r}
+new_phillies <- Phillies2009 %>%
+  group_by(Location)%>%
+  summarize(StrikeOuts_mean = round(mean(StrikeOuts), 2),
+            n =n())
+
+new_phillies
+```
+
+After grouping the data set based on the location, the mean of the StrikeOuts for away is 7.31 and for home is 6.95.
+
+```{r}
+home <- subset(Phillies2009, Location== "Home", StrikeOuts)
+away <- subset(Phillies2009, Location== "Away", StrikeOuts)
+
+obs_diff <- mean(away$StrikeOuts)	 - mean(home$StrikeOuts)
+obs_diff
+
+t.test(away$StrikeOuts, home$StrikeOuts, alternative = 'greater', var.equal = TRUE)
+```
+
+The mean difference of the observation is 0.3580247. The p-value in Two sample t-test is 0.2034 which is greater than of the alpha 0.05, so we fail to reject the null hypothesis. 
+This means there is no difference between strikeouts means for away and home.
+
+
+
+## 3.b):
+
+Perform a permutation test to see if the difference in means is statistically significant.
+
+
+```{r}
+set.seed(123)
+
+diff_mean <- numeric()
+
+
+for (i in 1:5000) {
+  pm <- sample(Phillies$StrikeOuts, 162, replace = FALSE)
+  diff_mean[i] <- mean(pm[1:81]) - mean(pm[82:162])
+  
+}
+
+
+hist(diff_mean)
+abline(v=obs_diff, lwd=2, col="purple")
+
+
+length(diff_mean[diff_mean >= obs_diff])/5000
+```
+
+After performing a permutation test, the difference in means is 0.2122 which means it is statistically significant since the proportion of 
+the permutation result is pretty close the result of the two sample t-test (0.2034).
+
+
+
+
+
+
+
+
+
+
+
+
+

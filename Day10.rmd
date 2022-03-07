@@ -18,5 +18,44 @@ df <- with(Bangladesh, Chlorine[!is.na(Chlorine)])
 ```
 
 
+```{r}
+m_chio <- mean(df)
+summary(df)
+```
+
+```{r}
+s <- sd(df)
+n <- length(df)
+
+se <- s/sqrt(n)
+```
+
+
+```{r}
+ub <- m_chio + 1.96 *se
+lb <- m_chio - 1.96 *se
+
+print(paste(round(lb , 3), round(ub, 3)))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
